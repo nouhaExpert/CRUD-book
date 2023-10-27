@@ -1,7 +1,9 @@
 const express=require("express")
 const app=express()
 const mongoose=require("mongoose")
-const Book = require("./models/book")
+const bookRoutes = require("./routes/book")
+const authorRoutes = require("./routes/author")
+const categoryRoutes = require("./routes/category")
 mongoose.connect(
     "mongodb://127.0.0.1:27017/Book",
 {useNewUrlParser: true, useUnifiedTopology: true}
@@ -23,83 +25,8 @@ app.use((req,res,next) =>{
     next()
 })
 app.use(express.json()) 
-
-// Obtenir la liste des livres
-app.get("/api/books",(req,res,next) =>{
-   Book.find().then((books)=> res.status(200).json({
-    model:books,
-    message:"success"
-}))
-.catch((error)=>{
-    res.status(400).json({
-        error:error.message,
-        message:"Impossible d\'obtenir la liste des livres",
-    })
-})
-})
-//Obtenir un livre par son ID
-app.get("/api/books/:id",(req,res)=>{
-   
-    Book.findOne({_id:req.params.id})
-    .then((book)=>{
-        if(!book){
-            res.status(404).json({
-                message:"Livre non trouvé",
-            })
-            return
-        }
-        res.status(200).json({
-            model:book,
-            message:"success"
-        })
-    } )
-    .catch((error)=>{
-        res.status(400).json({
-            error:error.message,
-            message:"Impossible d\'obtenir le livre",
-        })
-    })
-
-})
-// Créer un nouveau livre
-app.post("/api/books",(req,res)=>{
-    const book=new Book(req.body)
-    book.save().then(()=>{
-    res.status(201).json({
-        model:book,
-        message:"Livre crée !",
- } )})
- .catch((error)=>{
-    res.status(400).json({
-        error:error.message,
-        message:"Impossible de créer le livre",
-    })
-})
-})
-// Mettre à jour un livre
-app.patch("/api/books/:id",(req,res)=>{
-    Book.findOneAndUpdate({_id:req.params.id},
-        req.body,{new:true})
-        .then((book)=>{
-            if(!book){
-                res.status(404).json({
-                    message:"Livre non trouvé",
-                })
-                return
-            }else{
-                res.status(200).json({
-                    model:book,
-                    message:"Livre modifié"
-                })
-            }
-        })
-        .catch((error)=>res.status(400).json({error:error.message}))
-})
-//Supprimer un livre
-app.delete("/api/books/:id",(req,res)=>{
-    Book.deleteOne({_id:req.params.id})
-    .then(()=> res.status(200).json({message:"Livre supprimée"}))
-    .catch((error)=>res.status(400).json({error}))
-})
+app.use("/api/books",bookRoutes)
+app.use("/api/author",authorRoutes)
+app.use("/api/category",categoryRoutes)
 
 module.exports=app
