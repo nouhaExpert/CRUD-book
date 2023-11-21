@@ -1,5 +1,40 @@
 const author = require("../models/author")
 const Book=require("../models/book")
+const findByAuthor=(req,res,next) =>{
+    const authorId = req.params.id;
+    Book.findByAuthor(authorId).then((books)=> res.status(200).json({
+     model:books,
+     message:"success"
+ }))
+ .catch((error)=>{
+     res.status(400).json({
+         error:error.message,
+         message:"Impossible d\'obtenir la liste des livres",
+     })
+ })
+ }
+ //Vérifiez si l'auteur a des livres précédents
+ const addBookAuthor=(req,res)=>{
+    const book=new Book(req.body)
+      // Vérifiez si l'auteur a des livres précédents
+    const authorId = req.body.author;
+    const authorBooksCount = Book.countDocuments({ author: authorId });
+
+    if (authorBooksCount === 0) {
+      return res.status(400).json({ error: 'L\'auteur doit avoir écrit d\'autres livres avant de créer un nouveau livre.' });
+    }
+    book.save().then(()=>{
+    res.status(201).json({
+        model:book,
+        message:"Livre crée !",
+ } )})
+ .catch((error)=>{
+    res.status(400).json({
+        error:error.message,
+        message:"Impossible de créer le livre",
+    })
+})
+}
 const fetchBooks=(req,res,next) =>{
     Book.find().populate('author').then((books)=> res.status(200).json({
      model:books,
@@ -73,6 +108,8 @@ const deleteBook=(req,res)=>{
     .catch((error)=>res.status(400).json({error}))
 }
 module.exports={
+    findByAuthor,
+    addBookAuthor,
     fetchBooks,
     addBook,
     getBookById,

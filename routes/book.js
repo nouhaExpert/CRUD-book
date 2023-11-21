@@ -11,5 +11,11 @@ router.get("/",bookController.fetchBooks)
  router.patch("/:id",bookController.updateBook)
  //Supprimer un livre
  router.delete("/:id",bookController.deleteBook)
+ 
+ router.get('/author/:id', bookController.findByAuthor)
+
+//Ajouter livre en Vérifiez si l'auteur a des livres précédents
+ router.post("/createlivre",bookController.addBookAuthor)
+
 
  module.exports=router
